@@ -18,3 +18,11 @@ All application data reads, writes and generation require an authenticated profi
 Create a private GitHub repository, push this directory and import it as a new Vercel project. Add the environment variables above, deploy, and add the resulting callback URL to Supabase. In Vercel project Settings → Deployment Protection, disable Vercel Authentication and save. The application still enforces its own login and superadmin authorization. Check the deployed page in Incognito: it should display the login screen without a Vercel gate.
 
 Generation requests have a 300-second function budget and 60-second limit per model request; long chains can exceed hosting limits. Interrupted requests can leave a run marked running. Failed model calls retain completed step outputs. A future durable job queue is recommended for long chains and production workloads. Chain saves use last-write-wins; coordinate simultaneous editing.
+
+## Per-step model settings
+
+Each step has a Gemini model selector and optional temperature. Models are loaded server-side from Gemini's Models API using the existing `GEMINI_API_KEY`; the key is never sent to the browser. Image-output steps show image models; text and vision steps show text-output models. Provider model availability does not guarantee quota or billing access.
+
+Choose **Workspace default** to retain `GEMINI_MODEL` / `GEMINI_IMAGE_MODEL`. Leaving temperature blank uses the model's default. Numeric temperatures are checked against model metadata; fixed-sampling models omit this parameter. Google recommends default temperature for Gemini 3. Selected settings persist with the chain, and each run snapshots its resolved model and generation configuration. Existing chains continue using workspace defaults. No schema migration is required.
+
+Run settings regression tests with `node --test tests/*.test.mjs`.
