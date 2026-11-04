@@ -28,6 +28,7 @@ create table public.studio_chains (
 create table public.studio_runs (
  id uuid primary key default gen_random_uuid(),chain_id uuid not null references public.studio_chains on delete cascade,
  chain_name text not null,user_id uuid not null references auth.users,created_at timestamptz not null default now(),
+ input_image text,
  snapshot jsonb not null,status text not null check(status in ('running','completed','failed')),outputs jsonb not null default '[]',error text
 );
 alter table public.studio_chains enable row level security;

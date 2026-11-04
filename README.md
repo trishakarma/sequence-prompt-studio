@@ -11,7 +11,7 @@ A superadmin-only prompt chain editor built with Next.js and Supabase. Create, e
 5. Enable Google OAuth in Supabase and allow `http://localhost:3000/auth/callback` and the production callback URL in Authentication URL Configuration.
 6. Run `npm run dev`.
 
-All application data reads, writes and generation require an authenticated profile with `is_superadmin === true`. Database RLS independently enforces this restriction. No service role key is required. Steps are saved as an ordered JSON array in one atomic write; run snapshots preserve the executed sequence. `{{input}}`, `{{previous}}`, and `{{step1}}` reference input and preceding text outputs. Image-to-text steps use the uploaded source image. Image steps produce downloadable images when supported by the configured model. Generated images are stored privately with run data; history shows the latest 50 workspace runs. Source uploads are sent to the model and not retained.
+All application data reads, writes and generation require an authenticated profile with `is_superadmin === true`. Database RLS independently enforces this restriction. No service role key is required. Steps are saved as an ordered JSON array in one atomic write; run snapshots preserve the executed sequence. `{{input}}`, `{{previous}}`, and `{{step1}}` reference input and preceding text outputs. Image-to-text steps use the uploaded source image. Image steps produce downloadable images when supported by the configured model. Generated images are stored privately with run data; history shows the latest 50 workspace runs. Source uploads are saved privately with each new run and displayed alongside its outputs. Older runs have no retained source image.
 
 ## Deploy to Vercel
 
@@ -26,3 +26,7 @@ Each step has a Gemini model selector and optional temperature. Models are loade
 Choose **Workspace default** to retain `GEMINI_MODEL` / `GEMINI_IMAGE_MODEL`. Leaving temperature blank uses the model's default. Numeric temperatures are checked against model metadata; fixed-sampling models omit this parameter. Google recommends default temperature for Gemini 3. Selected settings persist with the chain, and each run snapshots its resolved model and generation configuration. Existing chains continue using workspace defaults. No schema migration is required.
 
 Run settings regression tests with `node --test tests/*.test.mjs`.
+
+## Run input images
+
+Existing installations should run `supabase/run-input-image.sql` before deploying. New runs save the validated source image with the run, protected by the existing superadmin-only RLS policy. Generated media shows it beside the step outputs (stacked on narrow screens). Old runs and text-only runs continue to render without a source image. Deleting a chain also deletes its runs and their saved images.

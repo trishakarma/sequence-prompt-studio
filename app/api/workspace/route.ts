@@ -23,7 +23,7 @@ export async function POST(request:Request){
  const key=process.env.GEMINI_API_KEY;if(!key)throw new Error('Configure GEMINI_API_KEY to generate media.');
  const models=await listModels();
  const resolved=(chain.steps as Step[]).map(step=>({...step,...generationSettings(step,{text:process.env.GEMINI_MODEL,image:process.env.GEMINI_IMAGE_MODEL},models)}));
- const {data:run,error:runError}=await client.from('studio_runs').insert({chain_id:chain.id,chain_name:chain.name,user_id:user.id,snapshot:resolved,status:'running'}).select('id').single();if(runError)throw new Error('Could not start run.');
+ const {data:run,error:runError}=await client.from('studio_runs').insert({chain_id:chain.id,chain_name:chain.name,user_id:user.id,snapshot:resolved,input_image:body.image||null,status:'running'}).select('id').single();if(runError)throw new Error('Could not start run.');
  const outputs:{name:string;text:string;image?:string}[]=[];let previous=body.input;
  try{for(const step of resolved){const prompt=step.prompt.replace(/\{\{(input|previous|step\d+)\}\}/g,(_,k)=>k==='input'?body.input:k==='previous'?previous:outputs[Number(k.slice(4))-1]?.text||'');const image=step.kind==='vision'?body.image:undefined;
  const model=step.model;
